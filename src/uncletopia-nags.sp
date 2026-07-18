@@ -1,9 +1,8 @@
 #pragma semicolon 1
+#pragma newdecls required
 
 #include <sourcemod>
 #include <morecolors>
-
-#pragma newdecls required
 
 // TODO: cvars?
 #define SCRAMBLE_TIMER g_cvarScrambleTimer.FloatValue
@@ -21,8 +20,8 @@ public Plugin myinfo = {
 
 static bool g_alertToScramble, g_didAlertToNominate;
 static int g_playedRounds;
-static Handle g_teamImbalanceTimer, g_longMapTimer;
-static ConVar g_cvarRtvTimer, g_cvarScrambleTimer;
+Handle g_teamImbalanceTimer, g_longMapTimer;
+ConVar g_cvarRtvTimer, g_cvarScrambleTimer;
 
 public void OnPluginStart() {
     g_playedRounds = 0;
@@ -58,8 +57,27 @@ public void OnMapStart() {
     g_longMapTimer = CreateTimer(RTV_TIMER, LongMapAlert);
 }
 
+stock bool IsBotMatch()
+{
+    int bots = 0;
+    for (int client = 1; client <= MaxClients; client++) {
+        if (client <= 0 || client > MaxClients) {
+            continue;
+        }
+
+        if (IsClientInGame(client) && IsFakeClient(client)) {
+            bots++;
+            if (bots > 2) {
+                return true;
+            } 
+        }
+    }
+
+	return false;
+}
+
 public void Event_RoundStart(Event event, const char[] name, bool dontBroadcast) {
-    if (g_alertToScramble) {
+    if (g_alertToScramble && !IsBotMatch()) {
         MC_PrintToChatAll("{red}Teams may be unbalanced.{default} Remember: You can type {red}!scramble{default} in chat to vote to scramble the teams.");
     }
 
@@ -68,8 +86,9 @@ public void Event_RoundStart(Event event, const char[] name, bool dontBroadcast)
         g_didAlertToNominate = true;
     }
 
-    MC_PrintToChatAll("{unusual}NOTICE: Be aware there are {red}fake uncletopia servers{unusual} spreading malware & harvesting IPs");
-    MC_PrintToChatAll("{unusual}Please visit uncletopia.com/servers for a list of safe servers");
+    PrintToChatAll("NOTICE: Be aware there are fake Ducktopia servers");
+    PrintToChatAll("Please visit Ducktopia.com for a list of real servers.");
+    PrintToChatAll("If you cannot connect to item servers, please try 'retry' in your console");
 
     CleanupTimer(g_teamImbalanceTimer);
 
@@ -78,6 +97,9 @@ public void Event_RoundStart(Event event, const char[] name, bool dontBroadcast)
 }
 
 public void Event_RoundEnd(Event event, const char[] name, bool dontBroadcast) {
+    MC_PrintToChatAll("{green}Like our servers?{default} Favorite our servers!");
+    MC_PrintToChatAll("{green}https://www.patreon.com/Ducktopia{default}");
+
     CleanupTimer(g_teamImbalanceTimer);
 }
 
