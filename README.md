@@ -1,4 +1,4 @@
-# Ducktopia Nags plugin
+# DuckPond Nags plugin
 
 A small plugin to provide reminders for rtv, scramble and nominate functionality
 at appropriate points in the play cycle.
